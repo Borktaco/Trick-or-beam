@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trick or Beam">
+<meta name="theme-color" content="#1a0f2e">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Trick or Beam</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d0718;position:fixed;inset:0;
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;
+ color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;overscroll-behavior:none}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
+.scr{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+ z-index:20;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.scr.on{display:flex}
+.panel{background:rgba(26,15,46,.96);border:3px solid #7b4fc9;border-radius:24px;padding:22px 26px;
+ max-width:min(640px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 0 40px rgba(123,79,201,.45);text-align:center}
+.panel h1{font-size:clamp(28px,5vw,44px);color:#ffb347;text-shadow:0 3px 0 #7a2ea0,0 0 24px rgba(255,179,71,.5);letter-spacing:1px;margin-bottom:8px}
+.panel h2{font-size:clamp(20px,3.4vw,30px);color:#ffb347;margin-bottom:10px}
+.panel p{font-size:clamp(14px,2.2vw,17px);line-height:1.5;color:#efe6ff;margin:8px 0}
+.btn{display:inline-block;background:linear-gradient(180deg,#ff9d3c,#f0671f);border:3px solid #7a2ea0;border-radius:18px;
+ color:#fff;font-weight:800;font-size:clamp(16px,2.6vw,21px);padding:14px 30px;margin:8px;cursor:pointer;
+ text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:0 5px 0 #5a1f78,0 8px 18px rgba(0,0,0,.5);transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #5a1f78}
+.btn.ghost{background:linear-gradient(180deg,#5b3f8f,#3d2a63);box-shadow:0 5px 0 #241741,0 8px 18px rgba(0,0,0,.5)}
+.btn.ghost:active{box-shadow:0 1px 0 #241741}
+.btn.small{font-size:15px;padding:9px 18px;border-radius:14px}
+.btnrow{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:10px}
+/* TITLE */
+#s-title{justify-content:flex-end;padding-bottom:12vh;background:#0d0718}
+#titlebg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
+#titlegrad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,7,24,.15) 30%,rgba(13,7,24,.88) 78%)}
+#titlelogo{position:relative;z-index:2;text-align:center;margin-bottom:14px}
+#titlelogo h1{font-size:clamp(44px,9vw,92px);color:#ffb347;text-shadow:0 4px 0 #7a2ea0,0 0 44px rgba(255,150,50,.75),0 6px 18px #000;letter-spacing:2px}
+#titlelogo .sub{font-size:clamp(15px,2.6vw,22px);color:#c9f27e;text-shadow:0 2px 6px #000;font-weight:700;letter-spacing:3px}
+#btn-play{position:relative;z-index:2;font-size:clamp(22px,4vw,32px);padding:20px 54px;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+#titlebtns{position:relative;z-index:2;display:flex;gap:6px}
+/* HUD */
+#hud{position:fixed;inset:0;z-index:15;pointer-events:none;display:none}
+#hud.on{display:block}
+#topbar{position:absolute;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.tchip{background:rgba(20,10,38,.82);border:2px solid #7b4fc9;border-radius:14px;padding:7px 12px;font-weight:800;
+ font-size:clamp(13px,2vw,17px);display:flex;align-items:center;gap:7px;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+#tb-costcv{width:30px;height:30px}
+#btn-pause{pointer-events:auto;width:52px;height:52px;border-radius:16px;font-size:22px;padding:0}
+.gbtn{position:absolute;pointer-events:auto;width:96px;height:96px;border-radius:50%;border:3px solid #7b4fc9;
+ background:rgba(30,18,55,.88);color:#fff;font-weight:900;font-size:15px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.55),inset 0 2px 6px rgba(255,255,255,.12);
+ text-shadow:0 2px 3px #000}
+.gbtn:active{background:rgba(90,55,150,.95);transform:scale(.94)}
+.gbtn .k{font-size:10px;color:#c9a7ff;font-weight:700;margin-top:2px}
+#btn-act{right:calc(18px + env(safe-area-inset-right));bottom:calc(120px + env(safe-area-inset-bottom));background:rgba(46,120,46,.9)}
+#btn-throw{right:calc(128px + env(safe-area-inset-right));bottom:calc(34px + env(safe-area-inset-bottom));background:rgba(150,80,20,.9)}
+#btn-pow{right:calc(24px + env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));background:rgba(60,40,130,.9)}
+#pow-cd{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+#holdwrap{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);width:220px;display:none}
+#holdbar{height:14px;border-radius:8px;background:#3a2a5c;border:2px solid #7b4fc9;overflow:hidden}
+#holdfill{height:100%;width:0%;background:linear-gradient(90deg,#c9f27e,#7ee86a)}
+#holdtxt{text-align:center;font-size:13px;font-weight:800;color:#c9f27e;text-shadow:0 2px 4px #000;margin-top:4px}
+#toast{position:fixed;top:22%;left:50%;transform:translateX(-50%);z-index:40;background:rgba(20,10,38,.94);
+ border:2px solid #ffb347;border-radius:16px;padding:12px 22px;font-size:clamp(15px,2.4vw,19px);font-weight:800;
+ color:#ffe9c9;display:none;text-align:center;max-width:86vw;box-shadow:0 6px 24px rgba(0,0,0,.6)}
+/* MAP */
+#mapwrap{position:relative;width:min(860px,94vw);height:min(520px,64vh)}
+.mapnode{position:absolute;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;border:3px solid #7b4fc9;
+ background:radial-gradient(circle at 35% 30%,#6b4bb3,#3a2568);display:flex;flex-direction:column;align-items:center;justify-content:center;
+ font-weight:900;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.6)}
+.mapnode .stars{font-size:11px;color:#ffd75e;letter-spacing:1px}
+.mapnode .nlbl{position:absolute;top:78px;font-size:11px;font-weight:800;color:#efe6ff;white-space:nowrap;text-shadow:0 2px 4px #000}
+.mapnode.locked{filter:grayscale(1) brightness(.55);cursor:default}
+.mapnode.cur{border-color:#ffb347;box-shadow:0 0 22px rgba(255,179,71,.8)}
+#mapcandy{position:absolute;top:calc(10px + env(safe-area-inset-top));left:14px}
+/* STORY */
+#s-story{background:#0d0718}
+#story-frame{position:relative;width:min(900px,94vw);height:min(560px,66vh);border-radius:20px;overflow:hidden;border:3px solid #7b4fc9;box-shadow:0 0 50px rgba(123,79,201,.5)}
+#story-img{position:absolute;width:112%;height:112%;object-fit:cover;animation:kenburns 24s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(1.12) translate(-3%,2%)}}
+#story-grad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,5,22,.92) 88%)}
+#story-txtbox{position:absolute;left:0;right:0;bottom:0;padding:18px 22px;text-align:left}
+#story-title{font-size:clamp(18px,3vw,26px);color:#ffb347;font-weight:900;margin-bottom:6px;text-shadow:0 2px 6px #000}
+#story-txt{font-size:clamp(15px,2.4vw,19px);line-height:1.5;color:#fff;min-height:3.2em;text-shadow:0 2px 6px #000}
+#story-hint{font-size:13px;color:#c9f27e;font-weight:700;margin-top:6px}
+#story-skip{position:absolute;bottom:8px;right:14px;font-size:12px;color:#b9a6e8}
+/* PROFILES */
+.profslot{display:flex;align-items:center;gap:12px;background:rgba(60,40,100,.5);border:2px solid #5b3f8f;border-radius:16px;
+ padding:12px 16px;margin:8px 0;cursor:pointer;width:min(420px,84vw)}
+.profslot.sel{border-color:#ffb347;box-shadow:0 0 16px rgba(255,179,71,.5)}
+.profslot .pname{font-size:19px;font-weight:900;flex:1;text-align:left}
+.profslot .pinfo{font-size:13px;color:#c9b8f0}
+.profslot input{background:#241741;border:2px solid #7b4fc9;border-radius:10px;color:#fff;font-size:17px;font-weight:700;padding:8px 12px;width:200px}
+/* SHOP / BOOK / ACHV */
+.shopitem{display:flex;align-items:center;gap:12px;background:rgba(60,40,100,.5);border:2px solid #5b3f8f;border-radius:14px;padding:10px 14px;margin:7px 0;text-align:left}
+.shopitem .sic{width:46px;height:46px;flex:none}
+.shopitem .sinfo{flex:1}
+.shopitem .sname{font-weight:900;font-size:16px;color:#ffd9a0}
+.shopitem .sdesc{font-size:13px;color:#d9ccf5}
+.shopitem.owned{border-color:#7ee86a}
+.shopitem.equipped{border-color:#ffb347;box-shadow:0 0 12px rgba(255,179,71,.5)}
+.bookentry,.achv{background:rgba(60,40,100,.5);border:2px solid #5b3f8f;border-radius:14px;padding:10px 14px;margin:7px 0;text-align:left}
+.bookentry h3,.achv h3{font-size:16px;color:#ffd9a0}
+.bookentry p,.achv p{font-size:13px;color:#d9ccf5}
+.achv.locked{filter:grayscale(1) brightness(.6)}
+.achv .adone{color:#7ee86a;font-weight:900}
+/* PAUSE */
+#pause-costumes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.costbtn{width:64px;height:64px;border-radius:16px;border:3px solid #5b3f8f;background:rgba(60,40,100,.6);cursor:pointer;position:relative}
+.costbtn.sel{border-color:#ffb347;box-shadow:0 0 14px rgba(255,179,71,.7)}
+.costbtn.locked{filter:grayscale(1) brightness(.5)}
+.costbtn canvas{width:100%;height:100%}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:10px 0;font-size:16px;font-weight:700;text-align:left}
+.setrow input[type=range]{flex:1;accent-color:#ffb347}
+.setrow select{background:#241741;color:#fff;border:2px solid #7b4fc9;border-radius:10px;padding:8px;font-size:15px}
+.switch{width:64px;height:34px;border-radius:18px;background:#3a2a5c;border:2px solid #7b4fc9;position:relative;cursor:pointer;flex:none}
+.switch.on{background:#4d9a3f}
+.switch::after{content:"";position:absolute;top:2px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .15s}
+.switch.on::after{left:31px}
+/* NEW ALIEN CARD */
+#s-card .panel{border-color:#7ee86a;box-shadow:0 0 40px rgba(126,232,106,.4)}
+#card-cv{width:150px;height:150px}
+/* PORTRAIT */
+#s-portrait{background:#0d0718;z-index:100;text-align:center;padding:30px}
+#s-portrait .big{font-size:64px;margin-bottom:16px}
+/* stars */
+.starsbig{font-size:clamp(34px,7vw,54px);letter-spacing:6px;margin:6px 0;color:#ffd75e;text-shadow:0 0 18px rgba(255,215,94,.7)}
+.starsbig .off{color:#4a3a6a;text-shadow:none}
+#done-stats{font-size:15px;color:#d9ccf5;line-height:1.7}
+.hidden{display:none!important}
+@media (max-width:700px){
+ .gbtn{width:84px;height:84px;font-size:13px}
+ #btn-act{right:calc(12px + env(safe-area-inset-right));bottom:calc(108px + env(safe-area-inset-bottom))}
+ #btn-throw{right:calc(108px + env(safe-area-inset-right));bottom:calc(28px + env(safe-area-inset-bottom))}
+ #btn-pow{right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+ <div id="topbar">
+  <div style="display:flex;gap:8px">
+   <div class="tchip"><canvas id="tb-costcv" width="60" height="60"></canvas><span id="tb-candy">0</span></div>
+   <div class="tchip" id="tb-clock">7:00 PM</div>
+  </div>
+  <div class="tchip" id="tb-fr">0/0</div>
+  <button class="btn small ghost gbtn" id="btn-pause" style="position:static;width:52px;height:52px;border-radius:16px">II</button>
+ </div>
+ <button class="gbtn" id="btn-act">HIDE<span class="k">E / tap</span></button>
+ <button class="gbtn" id="btn-throw">THROW<span class="k">drag to aim</span></button>
+ <button class="gbtn" id="btn-pow">POWER<span class="k">Q</span><div id="pow-cd"></div></button>
+ <div id="holdwrap"><div id="holdbar"><div id="holdfill"></div></div><div id="holdtxt">HOLD TO POP JAR</div></div>
+</div>
+<div id="toast"></div>
+
+<!-- TITLE -->
+<div class="scr on" id="s-title">
+ <img id="titlebg" src="assets/title-art.png" alt="">
+ <div id="titlegrad"></div>
+ <div id="titlelogo"><h1>TRICK OR BEAM</h1><div class="sub">A GUMDROP HOLLOW HALLOWEEN</div></div>
+ <button class="btn" id="btn-play">TAP TO PLAY</button>
+ <div id="titlebtns"><button class="btn small ghost" id="btn-how0">How to Play</button><button class="btn small ghost" id="btn-set0">Settings</button></div>
+</div>
+
+<!-- PROFILES -->
+<div class="scr" id="s-prof"><div class="panel">
+ <h2>Who is playing?</h2><p>Up to 4 profiles. Progress, candy and costumes are saved separately.</p>
+ <div id="prof-list"></div>
+ <div class="btnrow"><button class="btn" id="btn-profgo">Let's Go</button><button class="btn ghost" id="btn-profback">Back</button></div>
+</div></div>
+
+<!-- MAP -->
+<div class="scr" id="s-map">
+ <div class="tchip" id="mapcandy">0</div>
+ <div class="panel" style="max-width:min(920px,96vw)"><h2>Gumdrop Hollow</h2>
+ <p>Rescue your friends before midnight! Tap a glowing spot to play.</p>
+ <div id="mapwrap"></div>
+ <div class="btnrow">
+  <button class="btn small" id="btn-mapshop">Gourdley's Shop</button>
+  <button class="btn small ghost" id="btn-mapbook">Treat Book</button>
+  <button class="btn small ghost" id="btn-mapachv">Achievements</button>
+  <button class="btn small ghost" id="btn-mapset">Settings</button>
+  <button class="btn small ghost" id="btn-mapprof">Profiles</button>
+ </div></div>
+</div>
+
+<!-- STORY -->
+<div class="scr" id="s-story">
+ <div id="story-frame"><img id="story-img" src="" alt=""><div id="story-grad"></div>
+  <div id="story-txtbox"><div id="story-title"></div><div id="story-txt"></div><div id="story-hint"></div></div>
+  <div id="story-skip">hold screen to skip</div></div>
+ <div class="btnrow"><button class="btn" id="btn-storygo">Start</button></div>
+</div>
+
+<!-- HOW TO -->
+<div class="scr" id="s-how"><div class="panel"><h2>How to Play</h2><div id="how-body" style="text-align:left"></div>
+ <div class="btnrow"><button class="btn" id="btn-howback">Back</button></div></div></div>
+
+<!-- SETTINGS -->
+<div class="scr" id="s-set"><div class="panel"><h2>Settings</h2><div id="set-body"></div>
+ <div class="btnrow"><button class="btn" id="btn-setback">Back</button></div></div></div>
+
+<!-- SHOP -->
+<div class="scr" id="s-shop"><div class="panel"><h2>Gourdley's Porch Shop</h2>
+ <p>"Full-size candy bars for a hero! Spend that candy, kiddo."</p>
+ <div class="tchip" style="display:inline-flex"><span id="shop-candy">0</span>&nbsp;candy</div>
+ <div id="shop-list" style="margin-top:10px"></div>
+ <div class="btnrow"><button class="btn" id="btn-shopback">Back</button></div></div></div>
+
+<!-- TREAT BOOK -->
+<div class="scr" id="s-book"><div class="panel"><h2>Treat Book</h2><div id="book-list"></div>
+ <div class="btnrow"><button class="btn" id="btn-bookback">Back</button></div></div></div>
+
+<!-- ACHIEVEMENTS -->
+<div class="scr" id="s-achv"><div class="panel"><h2>Achievements</h2><div id="achv-list"></div>
+ <div class="btnrow"><button class="btn" id="btn-achvback">Back</button></div></div></div>
+
+<!-- PAUSE -->
+<div class="scr" id="s-pause"><div class="panel"><h2>Paused</h2>
+ <p>Swap costume (rescued friends share theirs):</p><div id="pause-costumes"></div>
+ <p>Throw with:</p><div id="pause-throw" class="btnrow"></div>
+ <div class="btnrow">
+  <button class="btn" id="btn-resume">Resume</button><button class="btn ghost" id="btn-prestart">Restart Level</button>
+  <button class="btn ghost" id="btn-pmap">Town Map</button><button class="btn ghost" id="btn-pset">Settings</button>
+  <button class="btn ghost" id="btn-phow">How to Play</button>
+ </div></div></div>
+
+<!-- LEVEL COMPLETE -->
+<div class="scr" id="s-done"><div class="panel"><h2 id="done-title">Level Complete!</h2>
+ <div class="starsbig" id="done-stars"></div><div id="done-stats"></div>
+ <div class="btnrow" id="done-btns">
+  <button class="btn" id="btn-donenext">Next</button><button class="btn ghost" id="btn-donereplay">Replay</button>
+  <button class="btn ghost" id="btn-donemap">Town Map</button>
+ </div></div></div>
+
+<!-- NEW ALIEN CARD -->
+<div class="scr" id="s-card"><div class="panel">
+ <h2 style="color:#7ee86a">NEW ALIEN!</h2><canvas id="card-cv" width="300" height="300"></canvas>
+ <h2 id="card-name"></h2><p id="card-desc"></p>
+ <div class="btnrow"><button class="btn" id="btn-cardok">Got it!</button></div></div></div>
+
+<!-- PORTRAIT WARNING -->
+<div class="scr" id="s-portrait"><div class="big">&#8635;</div>
+ <h2>Turn your iPad sideways!</h2><p>Trick or Beam is a landscape game.<br>Rotate your device to play.</p></div>
+
+<script src="game.js"></script>
+</body>
+</html>
