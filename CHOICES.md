@@ -107,3 +107,17 @@ Nothing here was asked of the player.
 - Not done: publishing to GitHub (needs Alec's approval + GitHub connection);
   human playtest on a real iPad (recommended before kids play); difficulty
   balance is tuned by feel.
+
+## GitHub publish notes (Milo, Oct 2 2026)
+- The GitHub App integration cannot create repositories (403), so Alec created
+  the empty public repo himself.
+- GitHub's file API corrupts binary files sent as text (verified: a pushed PNG
+  read back as base64 text, not an image), so the 13 story-art PNGs + icon were
+  NOT pushed via API. They must be uploaded via GitHub's web UI drag-and-drop
+  into `assets/`. The game runs without them (story images fall back gracefully).
+- The MCP tool-arg limit (128KB per argument) forced splitting the game into
+  `index.html` + `game.js` for the GitHub copy. Functionally identical to the
+  single-file build; re-verified in headless Chromium (animating canvas,
+  keyboard movement, zero errors).
+- GitHub Pages cannot be enabled via the available API tools — needs 2 clicks
+  in repo Settings.

@@ -24,7 +24,7 @@ Keyboard: WASD/arrows, Shift = run, E = action, Q = power, click = throw candy.
 
 ## Contents
 
-- `index.html` — the entire game (engine, 10 levels, story, shop, music — all in one file)
+- `index.html` + `game.js` — the entire game (engine, 10 levels, story, shop, music). Split into two files only because GitHub's API rejects single uploads over 128KB; zero build step, just open `index.html`.
 - `assets/` — title key art + 13 story illustrations (AI-generated), 180×180 home-screen icon
 - `manifest.webmanifest` — fullscreen/landscape web-app manifest
 - `HOW_TO_PLAY.md` — kid-friendly how-to card
